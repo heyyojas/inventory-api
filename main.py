@@ -7,6 +7,15 @@ from sqlalchemy.orm import Session
 
 app = FastAPI()
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 database_models.Base.metadata.create_all(bind = engine)
 
 @app.get("/")
