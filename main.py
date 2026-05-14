@@ -1,7 +1,12 @@
 from fastapi import FastAPI
 from models import Products
+from database import session, engine
+import database_models
+
 
 app = FastAPI()
+
+database_models.Base.metadata.create_all(bind = engine)
 
 @app.get("/")
 def greet():
@@ -14,8 +19,28 @@ products = [
     Products(id = 4, name = "Table", description =  "wooden table ", price = 29, quantity =  9),
 ]
 
+def init_db():
+    db = session()
+
+    count = db.query(database_models.Products).count
+
+
+    if count == 0: 
+        for product in products:
+            db.add(database_models.Products(**product.model_dump()))
+               
+        
+    db.commit()
+               
+
+init_db()
+
 @app.get("/products")
 def get_all_products(): 
+    # db connection
+    db = session()
+    # query
+    db.query()
     return products
 
 @app.get("/product/{id}")
@@ -31,3 +56,21 @@ def get_product_by_id(id : int):
 def add_product(product: Products):
     products.append(product)
     return product
+
+@app.put("/product")
+def update_product(id : int, product: Products):
+    for i in range(len(products)):
+        if products[i].id == id:
+            products[i] = product
+            return "Product Added Successfully"
+        
+        return "Product Not Found"
+    
+@app.delete("/product")
+def delete_product(id : int):
+    for i in range(len(products)):
+        if products[i].id == id:
+            del products[i]
+            return "Product Successfully Deleted"
+        
+        return "Product Not Found, Not Deleted"
