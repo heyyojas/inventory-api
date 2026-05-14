@@ -47,7 +47,7 @@ def init_db():
 
     if count == 0: 
         for product in products:
-            db.add(database_models.Products(**product.model_dump()))
+            db.add(database_models.Products(**product.dict()))
                
         
     db.commit()
@@ -72,7 +72,7 @@ def get_product_by_id(id : int, db: Session  = Depends(get_db)):
 
 @app.post("/product")
 def add_product(product: Products, db: Session  = Depends(get_db)):
-    db.add(database_models.Products(**product.model_dump()))
+    db.add(database_models.Products(**product.dict()))
     db.commit()
     return product
 
