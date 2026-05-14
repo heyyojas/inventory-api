@@ -19,9 +19,11 @@ app.add_middleware(
 
 database_models.Base.metadata.create_all(bind = engine)
 
+from fastapi.responses import RedirectResponse
+
 @app.get("/")
 def greet():
-    return "Welcome to Telusko Trac"
+    return RedirectResponse(url="/app")
 
 products = [
     Products(id = 1, name = "Phone", description =  "budget Phone", price = 99, quantity =  5),
