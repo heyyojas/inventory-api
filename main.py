@@ -99,4 +99,4 @@ def delete_product(id : int, db: Session  = Depends(get_db)):
     else: 
         return "Product Not Found, Not Deleted"
     
-app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
+app.mount("/app", StaticFiles(directory="frontend", html=True), name="frontend")
