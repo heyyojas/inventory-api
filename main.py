@@ -3,15 +3,12 @@ from models import Products
 from database import session, engine
 import database_models
 from sqlalchemy.orm import Session
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI()
 
-from fastapi.staticfiles import StaticFiles
-
-app.mount("/app", StaticFiles(directory="frontend", html=True), name="frontend")
-
-from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
@@ -99,3 +96,5 @@ def delete_product(id : int, db: Session  = Depends(get_db)):
             return "Product Successfully Deleted"
     else: 
         return "Product Not Found, Not Deleted"
+    
+app.mount("/app", StaticFiles(directory="frontend", html=True), name="frontend")
