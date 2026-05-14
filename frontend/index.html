@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Telusko Trac</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0d0f;
+    --bg2: #161619;
+    --bg3: #1e1e22;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0ede8;
+    --muted: #888580;
+    --accent: #e8ff4a;
+    --accent-dim: rgba(232,255,74,0.12);
+    --accent-hover: #d4eb2e;
+    --red: #ff5f57;
+    --green: #28c87a;
+    --blue: #4eaaff;
+    --tag-bg: rgba(232,255,74,0.08);
+    --radius: 10px;
+    --radius-lg: 14px;
+    font-family: 'Syne', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 36px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-icon {
+    width: 34px; height: 34px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-icon svg { width: 18px; height: 18px; }
+  .logo-text { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; color: var(--text); }
+  .logo-text span { color: var(--accent); }
+
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .status-text { font-size: 13px; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+  /* MAIN LAYOUT */
+  main { max-width: 1100px; margin: 0 auto; padding: 36px 36px 80px; }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: var(--border2); }
+  .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-family: 'DM Mono', monospace; }
+  .stat-value { font-size: 26px; font-weight: 700; color: var(--text); line-height: 1; }
+  .stat-value.accent { color: var(--accent); }
+
+  /* TOOLBAR */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .search-wrap {
+    flex: 1;
+    position: relative;
+  }
+  .search-wrap svg {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); width: 16px; height: 16px;
+  }
+  input[type="text"], input[type="number"], textarea, select {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: var(--radius);
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+  }
+  .search-input {
+    width: 100%;
+    padding-left: 38px;
+  }
+  select option { background: var(--bg2); }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    font-family: 'Syne', sans-serif;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer; border: none;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--accent); color: #0d0d0f; }
+  .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border2); }
+  .btn-ghost:hover { background: var(--bg3); border-color: var(--border2); }
+  .btn-danger { background: transparent; color: var(--red); border: 1px solid rgba(255,95,87,0.3); }
+  .btn-danger:hover { background: rgba(255,95,87,0.1); }
+  .btn-sm { padding: 6px 12px; font-size: 13px; }
+  .btn svg { width: 15px; height: 15px; }
+
+  /* TABLE */
+  .table-wrap {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { border-bottom: 1px solid var(--border); }
+  th {
+    padding: 13px 18px;
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1px;
+    color: var(--muted);
+    text-align: left;
+    font-family: 'DM Mono', monospace;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--bg3); }
+  td { padding: 14px 18px; font-size: 14px; }
+  .td-id { color: var(--muted); font-family: 'DM Mono', monospace; font-size: 13px; }
+  .td-name { font-weight: 600; color: var(--text); }
+  .td-desc { color: var(--muted); font-size: 13px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .td-price {
+    font-family: 'DM Mono', monospace;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .td-qty {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: 6px; padding: 3px 10px;
+    font-family: 'DM Mono', monospace; font-size: 13px;
+  }
+  .qty-low { color: var(--red); border-color: rgba(255,95,87,0.3); background: rgba(255,95,87,0.06); }
+  .qty-ok { color: var(--green); }
+  .action-btns { display: flex; gap: 6px; }
+
+  /* EMPTY STATE */
+  .empty-state {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--muted);
+  }
+  .empty-state p { margin-top: 8px; font-size: 14px; }
+
+  /* MODAL OVERLAY */
+  .overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center; justify-content: center;
+  }
+  .overlay.open { display: flex; }
+
+  /* MODAL */
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 18px;
+    padding: 28px 28px 24px;
+    width: 100%; max-width: 460px;
+    position: relative;
+    animation: slideUp 0.2s ease;
+  }
+  @keyframes slideUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  .modal-title {
+    font-size: 18px; font-weight: 700; margin-bottom: 20px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-close {
+    background: var(--bg3); border: none; color: var(--muted);
+    width: 28px; height: 28px; border-radius: 6px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: color 0.15s;
+  }
+  .modal-close:hover { color: var(--text); }
+  .form-grid { display: flex; flex-direction: column; gap: 14px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .5px; }
+  input[type="text"], input[type="number"], textarea { width: 100%; }
+  textarea { resize: vertical; min-height: 72px; }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+
+  /* TOAST */
+  #toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--bg3); border: 1px solid var(--border2);
+    color: var(--text); font-size: 14px;
+    padding: 12px 22px; border-radius: 10px;
+    opacity: 0; transition: all 0.3s; z-index: 999;
+    pointer-events: none; white-space: nowrap;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #toast.success { border-color: rgba(40,200,122,0.4); color: var(--green); }
+  #toast.error { border-color: rgba(255,95,87,0.4); color: var(--red); }
+
+  /* LOADING */
+  .loading-row td { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
+  .spinner {
+    display: inline-block; width: 20px; height: 20px;
+    border: 2px solid var(--border2); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 0.7s linear infinite;
+    vertical-align: middle; margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-title { font-size: 20px; font-weight: 700; }
+  .count-badge {
+    background: var(--tag-bg); color: var(--accent);
+    border: 1px solid rgba(232,255,74,0.2);
+    border-radius: 20px; padding: 2px 10px;
+    font-size: 13px; font-family: 'DM Mono', monospace;
+    margin-left: 10px;
+  }
+
+  /* DELETE CONFIRM */
+  .delete-confirm-text { font-size: 14px; color: var(--muted); margin-bottom: 4px; }
+  .delete-confirm-name { font-size: 16px; font-weight: 600; color: var(--text); }
+
+  /* API URL BAR */
+  .api-bar {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px 16px;
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 28px;
+  }
+  .api-bar-label { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing:.5px; white-space:nowrap; }
+  .api-url-input {
+    flex: 1; background: transparent; border: none;
+    color: var(--blue); font-family: 'DM Mono', monospace;
+    font-size: 13px; outline: none; padding: 0;
+  }
+  .api-url-input:focus { border: none; }
+
+  @media (max-width: 700px) {
+    header { padding: 16px 18px; }
+    main { padding: 20px 16px 60px; }
+    .stats-bar { grid-template-columns: 1fr 1fr; }
+    th:nth-child(3), td:nth-child(3) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="6" height="6" rx="1.5" fill="#0d0d0f"/>
+        <rect x="10" y="2" width="6" height="6" rx="1.5" fill="#0d0d0f"/>
+        <rect x="2" y="10" width="6" height="6" rx="1.5" fill="#0d0d0f"/>
+        <rect x="10" y="10" width="6" height="6" rx="1.5" fill="#0d0d0f"/>
+      </svg>
+    </div>
+    <div class="logo-text">Telusko <span>Trac</span></div>
+  </div>
+  <div class="header-right">
+    <div class="status-dot"></div>
+    <div class="status-text" id="api-status">connecting...</div>
+  </div>
+</header>
+
+<main>
+  <!-- API URL config -->
+  <div class="api-bar">
+    <span class="api-bar-label">API BASE</span>
+    <input class="api-url-input" id="api-base" type="text" value="https://beatmymeat.onrender.com" placeholder="https://beatmymeat.onrender.com" />
+    <button class="btn btn-ghost btn-sm" onclick="loadProducts()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M13.5 8A5.5 5.5 0 1 1 8 2.5" stroke-linecap="round"/>
+        <polyline points="13.5,2.5 13.5,6 10,6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Refresh
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-label">Total Products</div>
+      <div class="stat-value accent" id="stat-total">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Stock</div>
+      <div class="stat-value" id="stat-stock">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Inventory Value</div>
+      <div class="stat-value" id="stat-value">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Low Stock (&lt;5)</div>
+      <div class="stat-value" id="stat-low" style="color:var(--red)">—</div>
+    </div>
+  </div>
+
+  <!-- Section header + toolbar -->
+  <div class="section-header">
+    <div>
+      <span class="section-title">Products</span>
+      <span class="count-badge" id="count-badge">0</span>
+    </div>
+    <button class="btn btn-primary" onclick="openAddModal()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/>
+      </svg>
+      Add Product
+    </button>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="6.5" cy="6.5" r="4"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke-linecap="round"/>
+      </svg>
+      <input type="text" class="search-input" id="search-input" placeholder="Search by name or description..." oninput="renderTable()" />
+    </div>
+    <select id="sort-select" onchange="renderTable()">
+      <option value="id">Sort: ID</option>
+      <option value="name">Sort: Name</option>
+      <option value="price">Sort: Price</option>
+      <option value="quantity">Sort: Qty</option>
+    </select>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Price</th>
+          <th>Qty</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="products-tbody">
+        <tr class="loading-row"><td colspan="6"><span class="spinner"></span>Loading products...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<!-- ADD / EDIT MODAL -->
+<div class="overlay" id="product-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="modal-title-text">Add Product</span>
+      <button class="modal-close" onclick="closeModal('product-modal')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="form-grid">
+      <div>
+        <label>Product ID</label>
+        <input type="number" id="field-id" placeholder="e.g. 5" min="1" />
+      </div>
+      <div>
+        <label>Name</label>
+        <input type="text" id="field-name" placeholder="e.g. Keyboard" />
+      </div>
+      <div>
+        <label>Description</label>
+        <textarea id="field-desc" placeholder="Short description..."></textarea>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Price ($)</label>
+          <input type="number" id="field-price" placeholder="0.00" min="0" step="0.01" />
+        </div>
+        <div>
+          <label>Quantity</label>
+          <input type="number" id="field-qty" placeholder="0" min="0" step="1" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('product-modal')">Cancel</button>
+      <button class="btn btn-primary" id="modal-submit-btn" onclick="submitProduct()">Add Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="overlay" id="delete-modal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-title">
+      <span>Delete product?</span>
+      <button class="modal-close" onclick="closeModal('delete-modal')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="delete-confirm-text">You're about to delete</div>
+    <div class="delete-confirm-name" id="delete-product-name">—</div>
+    <p style="font-size:13px;color:var(--muted);margin-top:10px">This action cannot be undone.</p>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('delete-modal')">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let allProducts = [];
+let editingId = null;
+let deletingId = null;
+
+function apiBase() {
+  return document.getElementById('api-base').value.replace(/\/$/, '');
+}
+
+async function loadProducts() {
+  const tbody = document.getElementById('products-tbody');
+  tbody.innerHTML = '<tr class="loading-row"><td colspan="6"><span class="spinner"></span>Loading products...</td></tr>';
+  document.getElementById('api-status').textContent = 'connecting...';
+  try {
+    const res = await fetch(`${apiBase()}/products`);
+    if (!res.ok) throw new Error('API error ' + res.status);
+    allProducts = await res.json();
+    document.getElementById('api-status').textContent = 'connected';
+    updateStats();
+    renderTable();
+  } catch(e) {
+    document.getElementById('api-status').textContent = 'offline';
+    tbody.innerHTML = `<tr class="loading-row"><td colspan="6" style="color:var(--red)">⚠ Could not reach API — check URL above</td></tr>`;
+  }
+}
+
+function updateStats() {
+  const total = allProducts.length;
+  const stock = allProducts.reduce((s, p) => s + Number(p.quantity), 0);
+  const value = allProducts.reduce((s, p) => s + Number(p.price) * Number(p.quantity), 0);
+  const low = allProducts.filter(p => Number(p.quantity) < 5).length;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-stock').textContent = stock;
+  document.getElementById('stat-value').textContent = '$' + value.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  document.getElementById('stat-low').textContent = low;
+}
+
+function renderTable() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const sort = document.getElementById('sort-select').value;
+  let list = allProducts.filter(p =>
+    p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q)
+  );
+  list.sort((a, b) => {
+    if (sort === 'name') return a.name.localeCompare(b.name);
+    if (sort === 'price') return Number(a.price) - Number(b.price);
+    if (sort === 'quantity') return Number(a.quantity) - Number(b.quantity);
+    return a.id - b.id;
+  });
+  document.getElementById('count-badge').textContent = list.length;
+  const tbody = document.getElementById('products-tbody');
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.4"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><p>No products found</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(p => {
+    const qty = Number(p.quantity);
+    const qtyClass = qty < 5 ? 'qty-low' : 'qty-ok';
+    return `<tr>
+      <td class="td-id">#${p.id}</td>
+      <td class="td-name">${esc(p.name)}</td>
+      <td class="td-desc">${esc(p.description)}</td>
+      <td class="td-price">$${Number(p.price).toFixed(2)}</td>
+      <td><span class="td-qty ${qtyClass}">${qty}</span></td>
+      <td>
+        <div class="action-btns">
+          <button class="btn btn-ghost btn-sm" onclick="openEditModal(${p.id})">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11.5 2.5l2 2-9 9L2 14l.5-2.5 9-9z"/></svg>
+            Edit
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="openDeleteModal(${p.id}, '${esc(p.name)}')">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="4,4 12,4"/><path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1"/><rect x="3" y="4" width="10" height="10" rx="1"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ADD
+function openAddModal() {
+  editingId = null;
+  document.getElementById('modal-title-text').textContent = 'Add Product';
+  document.getElementById('modal-submit-btn').textContent = 'Add Product';
+  document.getElementById('field-id').value = '';
+  document.getElementById('field-name').value = '';
+  document.getElementById('field-desc').value = '';
+  document.getElementById('field-price').value = '';
+  document.getElementById('field-qty').value = '';
+  document.getElementById('field-id').disabled = false;
+  document.getElementById('product-modal').classList.add('open');
+}
+
+// EDIT
+function openEditModal(id) {
+  const p = allProducts.find(x => x.id === id);
+  if (!p) return;
+  editingId = id;
+  document.getElementById('modal-title-text').textContent = 'Edit Product';
+  document.getElementById('modal-submit-btn').textContent = 'Save Changes';
+  document.getElementById('field-id').value = p.id;
+  document.getElementById('field-id').disabled = true;
+  document.getElementById('field-name').value = p.name;
+  document.getElementById('field-desc').value = p.description;
+  document.getElementById('field-price').value = p.price;
+  document.getElementById('field-qty').value = p.quantity;
+  document.getElementById('product-modal').classList.add('open');
+}
+
+async function submitProduct() {
+  const id = parseInt(document.getElementById('field-id').value);
+  const name = document.getElementById('field-name').value.trim();
+  const description = document.getElementById('field-desc').value.trim();
+  const price = parseFloat(document.getElementById('field-price').value);
+  const quantity = parseInt(document.getElementById('field-qty').value);
+
+  if (!name || isNaN(price) || isNaN(quantity) || (!editingId && isNaN(id))) {
+    showToast('Please fill all fields correctly.', 'error'); return;
+  }
+
+  const payload = { id: editingId || id, name, description, price, quantity };
+  const btn = document.getElementById('modal-submit-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+
+  try {
+    let res;
+    if (editingId) {
+      res = await fetch(`${apiBase()}/product?id=${editingId}`, {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+    } else {
+      res = await fetch(`${apiBase()}/product`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+    }
+    if (!res.ok) throw new Error('API error');
+    closeModal('product-modal');
+    showToast(editingId ? 'Product updated!' : 'Product added!', 'success');
+    await loadProducts();
+  } catch(e) {
+    showToast('Failed to save. Check API.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = editingId ? 'Save Changes' : 'Add Product';
+  }
+}
+
+// DELETE
+function openDeleteModal(id, name) {
+  deletingId = id;
+  document.getElementById('delete-product-name').textContent = name + ' (#' + id + ')';
+  document.getElementById('delete-modal').classList.add('open');
+}
+
+async function confirmDelete() {
+  if (!deletingId) return;
+  try {
+    const res = await fetch(`${apiBase()}/product?id=${deletingId}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error();
+    closeModal('delete-modal');
+    showToast('Product deleted.', 'success');
+    await loadProducts();
+  } catch {
+    showToast('Delete failed. Check API.', 'error');
+  }
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+});
+
+// Toast
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = ''; }, 3000);
+}
+
+// Keyboard close
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.overlay.open').forEach(el => el.classList.remove('open'));
+});
+
+loadProducts();
+</script>
+</body>
+</html>
