@@ -7,6 +7,10 @@ from sqlalchemy.orm import Session
 
 app = FastAPI()
 
+from fastapi.staticfiles import StaticFiles
+
+app.mount("/app", StaticFiles(directory="frontend", html=True), name="frontend")
+
 from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
